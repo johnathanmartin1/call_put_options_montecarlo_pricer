@@ -6,6 +6,11 @@
 #include <random>
 #include <ctime>
 #include <numeric>
+
+
+/*variables, these need to be user defined in later verions. Aklso included some kind of error 
+catching for wrong value insertion i.e. letters in float variables. Empty input should result
+in a default value being assigned ie. empty mean and sd defaults to 0 and 1*/
 float initial_price{ 100 };
 
 float interest_rate{ 0.05 };
@@ -22,10 +27,10 @@ float strike_price{ 115 };
 
 float mean{ 0 };
 
-float standard_distribution{ 1 };
+float standard_deviation{ 1 };
 
-
-
+/*This function (random walk) could be made into a mutilthreaded operation as each element in
+the array is independent from another, this would increase speed*/
 float random_walk(float x) {
 	/*calculating the interest component of the assest price*/
 	float interest_component{};
@@ -34,7 +39,7 @@ float random_walk(float x) {
 	//normal random number genrator centered on a goven mean with a given standard deviation
 	std::random_device r; //settig a random seed
 	std::default_random_engine generator(r()); //random generator form the random seed
-	std::normal_distribution<float> distribution(mean, standard_distribution); 
+	std::normal_distribution<float> distribution(mean, standard_deviation); 
 	
 	/*calculating the random component of the price*/
 	float random_component{};
@@ -51,9 +56,9 @@ float option_value(float x) {
 
 int main()
 {
-	
 	/*intialised array with intial starting price given to all sims*/
 	float prices[number_of_sims] = {}; 
+	
 	for (int i = 0; i < number_of_sims; ++i) {
 		prices[i] = initial_price;
 	}
@@ -69,44 +74,48 @@ int main()
 	//array size total bytes divded by a single emlements bytes gives the total number of elements
 	//std::cout << sizeof(prices)/ sizeof(prices[0]);
 	float total_value_of_sims{0};
+	
 	for (int i = 0; i < number_of_sims; ++i) {
 		total_value_of_sims += prices[i];
 		//std::cout << "running total "<<total_value_of_sims<< std::endl;
 	}
 	/*Calculating the average price across the various simulations at strike time*/
 	float monte_carlo_price{};
+	
 	monte_carlo_price = total_value_of_sims / (sizeof(prices) / sizeof(prices[0]));
-	std::cout << "monte carlo price at strike time " << monte_carlo_price << '\n';
+	
+	std::cout << "Asset price at strike time " << char(156) << monte_carlo_price << '\n';
 
-	/*calculating the put and call total values from the simulation at strike time*/
+	/*calculating the put and call total values from the simulation at strike time
+	this could be put into a function*/
 	float put_total{ 0 };
+	
 	float call_total{ 0 };
+	
 	float price_strike_difference{};
+	
 	for (int i = 0; i < number_of_sims; ++i) {
+	
 		float price_strike_difference{};
+		
 		price_strike_difference = prices[i] - strike_price;
+		
 		if (price_strike_difference > 0) {
+		
 			put_total += price_strike_difference;
 		}
 		if (price_strike_difference < 0) {
+			
 			call_total += -1 * price_strike_difference;
 		}
 	}
+	/*add output stating the users chosen variables*/
 
-	std::cout << "put value " << option_value(put_total) << '\n';
-	std::cout << "call value " << option_value(call_total) << '\n';
+	/*print out put and call values to terminal*/
+	std::cout << "Put value at strike time " << char(156) << option_value(put_total) << '\n';
+	
+	std::cout << "Call value at strike time " << char(156) << option_value(call_total) << '\n';
 
 
 	return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
