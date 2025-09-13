@@ -2,36 +2,115 @@
 //
 
 #include <iostream>
-#include <array>
+#include <memory>
+#include <stdexcept> 
 #include <random>
-#include <ctime>
 #include <numeric>
+#include <vector>
 
 
 /*variables, these need to be user defined in later verions. Aklso included some kind of error 
 catching for wrong value insertion i.e. letters in float variables. Empty input should result
 in a default value being assigned ie. empty mean and sd defaults to 0 and 1*/
-float initial_price{ 100 };
+class Option {
+private:
+	std::unique_ptr<double> StartingPrice;
+	std::unique_ptr<double> InterestRate;
+	std::unique_ptr<double> Volatility;
+	std::unique_ptr<double> TimeStepSize;
+	std::unique_ptr<double> StrikeTime;
+	std::unique_ptr<double> StrikePrice;
+	std::unique_ptr<double> Mean;
+	std::unique_ptr<double> StandardDeviation;
+	std::unique_ptr<int> NumberOfSimulations;
 
-float interest_rate{ 0.05 };
+public:
+	Option(double startingprice = 100, double interestrate = 0.05, double volatility = 0.2,
+		double strikeprice = 115, double striketime = 1, double timestepsize = 0.01,
+		double mean = 0, double standarddeviation = 1, int numberofsimulations=1000) :
+		StartingPrice( std::make_unique<double>( startingprice ) ),
+		InterestRate( std::make_unique<double>( interestrate ) ),
+		Volatility( std::make_unique<double>( volatility ) ),
+		StrikePrice( std::make_unique<double>( strikeprice ) ),
+		StrikeTime( std::make_unique<double>( striketime ) ),
+		TimeStepSize( std::make_unique<double>( timestepsize ) ),
+		Mean( std::make_unique<double>( mean ) ),
+		StandardDeviation( std::make_unique<double>( standarddeviation ) ),
+		NumberOfSimulations( std::make_unique<int>( numberofsimulations ) )
+	{
+		
+		while (*StartingPrice <= 0) {
+			std::cerr << "Starting price must be a number greater than " << char(156) <<"0.00\n";
+			std::cout << "Please enter a starting price: " << std::endl;
+			double newstartprice{};
+			std::cin >> newstartprice;
+			setStartingPrice(newstartprice);
+		}
+	
+	};
+	/*setters for the variables*/
+	void setStartingPrice(double newstartingprice) {
+		StartingPrice = std::move(std::make_unique<double>(newstartingprice));
+	}
+	void setInterestRate(double newinterestrate) {
+		InterestRate = std::move(std::make_unique<double>(newinterestrate));
+	}
+	void setVolatility(double newvolatility) {
+		Volatility = std::move(std::make_unique<double>(newvolatility));
+	}
+	void setStrikePrice(double newstrikeprice) {
+		StrikePrice = std::move(std::make_unique<double>(newstrikeprice));
+	}
+	void setStrikeTime(double newstriketime) {
+		StrikeTime = std::move(std::make_unique<double>(newstriketime));
+	}
+	void setTimeStepSize(double newtimestepsize) {
+		TimeStepSize = std::move(std::make_unique<double>(newtimestepsize));
+	}
+	void setMean(double newmean) {
+		Mean = std::move(std::make_unique<double>(newmean));
+	}
+	void setStandardDeviation(double newstandarddeviation) {
+		StandardDeviation = std::move(std::make_unique<double>(newstandarddeviation));
+	}
+	void setNumberOfSimulations(int newnumberofsimulations) {
+		NumberOfSimulations = std::move(std::make_unique<int>(newnumberofsimulations));
+	}
+	/*getters*/
+	double getStartingPrice() {
+		return *StartingPrice;
+	}
+	double getInterestRate() {
+		return *InterestRate;
+	}
+	double getVolatility() {
+		return *Volatility;
+	}
+	double getStrikePrice() {
+		return *StrikePrice;
+	}
+	double getStrikeTime() {
+		return *StrikeTime;
+	}
+	double getTimeStepSize() {
+		return *TimeStepSize;
+	}
+	double getMean() {
+		return *Mean;
+	}
+	double getStandardDeviation() {
+		return *StandardDeviation;
+	}
+	int getNumberOfSimulations() {
+		return *NumberOfSimulations;
+	}
+};
 
-float volatility{ 0.2 };
-
-float time_step_size{ 0.01 };
-
-float strike_time{ 1 };
-
-static const int number_of_sims{ 10000 };
-
-float strike_price{ 115 };
-
-float mean{ 0 };
-
-float standard_deviation{ 1 };
 
 /*This function (random walk) could be made into a mutilthreaded operation as each element in
 the array is independent from another, this would increase speed*/
-float random_walk(float x) {
+float random_walk(double current_price, double interest_rate, double volatility,
+	double time_step_size, double mean, double standard_deviation) {
 	/*calculating the interest component of the assest price*/
 	float interest_component{};
 	interest_component = (interest_rate - 0.5 * volatility * volatility) * time_step_size;
@@ -46,43 +125,48 @@ float random_walk(float x) {
 	random_component = volatility * std::sqrt(time_step_size) * distribution(generator);
 	
 	/*returning the updated assest price*/
-	return x * std::exp(interest_component + random_component);
+	return current_price * std::exp(interest_component + random_component);
 }
 
-float option_value(float x) {
+float option_value(double total_value_sum, double number_of_sims, double interest_rate,
+	double strike_time) {
 	/*return the asses option value based on the call or put totals of the simulation*/
-	return (x / number_of_sims) * std::exp(-interest_rate * strike_time);
+	return (total_value_sum / number_of_sims) * std::exp(-interest_rate * strike_time);
 }
 
 int main()
 {
+	Option test{};
 	/*intialised array with intial starting price given to all sims*/
-	float prices[number_of_sims] = {}; 
-	
-	for (int i = 0; i < number_of_sims; ++i) {
-		prices[i] = initial_price;
+	//double prices[test.getNumberOfSimulations()] = {};
+	std::vector<double> prices;
+
+	for (int i = 0; i < test.getNumberOfSimulations(); ++i) {
+		prices.push_back(test.getStartingPrice());
+		//prices[i] = test.getStartingPrice();
 	}
 
 	/*running the random walk at each time step for each element in the price array*/
-	for (int t = 1; t <= strike_time/time_step_size; ++t) {
+	for (double t = 0.01; t <= test.getStrikeTime(); t+=0.01) {
 		/*running through the price array and updating with the random walk pricing*/
-		for (int i = 0; i < number_of_sims; ++i) {
-			prices[i] = random_walk(prices[i]);
+		for (int i = 0; i < test.getNumberOfSimulations(); ++i) {
+			prices[i] = random_walk(prices[i],test.getInterestRate(), test.getVolatility(),
+				test.getTimeStepSize(), test.getMean(), test.getStandardDeviation());
 			//std::cout << "prices in progress " << prices[i] << std::endl;
 		}
 	}
 	//array size total bytes divded by a single emlements bytes gives the total number of elements
 	//std::cout << sizeof(prices)/ sizeof(prices[0]);
-	float total_value_of_sims{0};
+	double total_value_of_sims{0};
 	
-	for (int i = 0; i < number_of_sims; ++i) {
+	for (int i = 0; i < test.getNumberOfSimulations(); ++i) {
 		total_value_of_sims += prices[i];
 		//std::cout << "running total "<<total_value_of_sims<< std::endl;
 	}
 	/*Calculating the average price across the various simulations at strike time*/
 	float monte_carlo_price{};
 	
-	monte_carlo_price = total_value_of_sims / (sizeof(prices) / sizeof(prices[0]));
+	monte_carlo_price = total_value_of_sims / prices.size();
 	
 	std::cout << "Asset price at strike time " << char(156) << monte_carlo_price << '\n';
 
@@ -94,11 +178,11 @@ int main()
 	
 	float price_strike_difference{};
 	
-	for (int i = 0; i < number_of_sims; ++i) {
+	for (int i = 0; i < test.getNumberOfSimulations(); ++i) {
 	
 		float price_strike_difference{};
 		
-		price_strike_difference = prices[i] - strike_price;
+		price_strike_difference = prices[i] - test.getStrikePrice();
 		
 		if (price_strike_difference > 0) {
 		
@@ -112,10 +196,13 @@ int main()
 	/*add output stating the users chosen variables*/
 
 	/*print out put and call values to terminal*/
-	std::cout << "Put value at strike time " << char(156) << option_value(put_total) << '\n';
+	std::cout << "Put value at strike time " << char(156) << option_value(put_total,
+		test.getNumberOfSimulations(), test.getInterestRate(), test.getStrikeTime()) << '\n';
 	
-	std::cout << "Call value at strike time " << char(156) << option_value(call_total) << '\n';
+	std::cout << "Call value at strike time " << char(156) << option_value(call_total,
+		test.getNumberOfSimulations(), test.getInterestRate(), test.getStrikeTime()) << '\n';
 
 
 	return 0;
 }
+
