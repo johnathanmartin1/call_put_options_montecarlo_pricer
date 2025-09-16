@@ -3,20 +3,21 @@
 #include <vector>
 
 #include "Option.h"
-#include "statistics.h"
+//#include "statistics.h"
+//#include "MonteCarlo.h"
 
 /*constructor for an object with class "Option" with sanity checjks on inoputted variabels*/
 
 Contract::Contract(double startingprice, double interestrate, double volatility,
 	double strikeprice, double striketime, double timestepsize ,
-	double mean, double standarddeviation, int numberofsimulations) :
+	double randommean, double standarddeviation, int numberofsimulations) :
 	StartingPrice(std::make_unique<double>(startingprice)),
 	InterestRate(std::make_unique<double>(interestrate)),
 	Volatility(std::make_unique<double>(volatility)),
 	StrikePrice(std::make_unique<double>(strikeprice)),
 	StrikeTime(std::make_unique<double>(striketime)),
 	TimeStepSize(std::make_unique<double>(timestepsize)),
-	Mean(std::make_unique<double>(mean)),
+	RandomMean(std::make_unique<double>(randommean)),
 	StandardDeviation(std::make_unique<double>(standarddeviation)),
 	NumberOfSimulations(std::make_unique<int>(numberofsimulations))
 {
@@ -41,6 +42,17 @@ Contract::Contract(double startingprice, double interestrate, double volatility,
 void Contract::setStartingPrice(double newstartingprice) 
 {
 	StartingPrice = std::move(std::make_unique<double>(newstartingprice));
+
+	/*Sanity checks on the input*/
+	while (*StartingPrice <= 0)
+	{
+		std::cerr << "Starting price must be a number greater than " << char(156) << "0.00\n";
+		std::cout << "Please enter a starting price: " << std::endl;
+		double newstartprice{};
+		std::cin >> newstartprice;
+		setStartingPrice(newstartprice);
+	}
+	VectorIntialisation(prices, getNumberOfSimulations(), getStartingPrice());
 }
 
 void Contract::setInterestRate(double newinterestrate) 
@@ -68,9 +80,9 @@ void Contract::setTimeStepSize(double newtimestepsize)
 	TimeStepSize = std::move(std::make_unique<double>(newtimestepsize));
 }
 
-void Contract::setMean(double newmean) 
+void Contract::setRandomMean(double newmean) 
 {
-	Mean = std::move(std::make_unique<double>(newmean));
+	RandomMean = std::move(std::make_unique<double>(newmean));
 }
 
 void Contract::setStandardDeviation(double newstandarddeviation) 
@@ -81,6 +93,8 @@ void Contract::setStandardDeviation(double newstandarddeviation)
 void Contract::setNumberOfSimulations(int newnumberofsimulations) 
 {
 	NumberOfSimulations = std::move(std::make_unique<int>(newnumberofsimulations));
+	
+	VectorIntialisation(prices, getNumberOfSimulations(), getStartingPrice());
 }
 
 /*-------------------------------------------------------------------------------------------------*/
@@ -115,9 +129,9 @@ double Contract::getTimeStepSize()
 	return *TimeStepSize;
 }
 
-double Contract::getMean() 
+double Contract::getRandomMean() 
 {
-	return *Mean;
+	return *RandomMean;
 }
 
 double Contract::getStandardDeviation() 
@@ -133,7 +147,83 @@ int Contract::getNumberOfSimulations()
 /*-------------------------------------------------------------------------------------------------*/
 /*functions for Contract class*/
 
-/*intialises the price vector with the atrting price with the required number of simulations*/
-void Contract::VectorIntialisation(std::vector<double>& prices, int sims, double price) {
+/*intialises the price vector with the startting price with the required number of simulations*/
+void Contract::VectorIntialisation(std::vector<double>& prices, int sims, double price) 
+{
 	prices.assign(sims, price);
+}
+
+/*runs a monte carlo simulation with the chosen number of runs*/
+void Contract::MonteCarlo() 
+{
+	RandomWalk(prices, getStrikeTime(), getNumberOfSimulations(), getInterestRate(),
+		getVolatility(), getTimeStepSize(), getRandomMean(), getStandardDeviation());
+}
+
+/*runs a monte carlo simulation with the number of runs required for 95% cofidence interval */
+void Contract::MonteCarloAuto()
+{
+	setNumberOfSimulations(2000);
+
+	MonteCarlo();
+	
+	setNumberOfSimulations(NumberOfRuns(prices));
+	
+	std::cout << "The number of required simulations for 95% accuracy is " <<
+		getNumberOfSimulations() << '\n';
+	
+	MonteCarlo();
+}
+
+/*Produces the value of a contracts option absed on the call/pit sums of teh simulation*/
+double Contract::OptionValue(double sumoptionvalue) {
+	return (sumoptionvalue / getNumberOfSimulations()) *
+		std::exp(-getInterestRate() * getStrikeTime());
+}
+
+/*prints the put option value*/
+void Contract::PutValue() 
+{
+	double puttotal{};
+	
+	for (int i = 0; i < getNumberOfSimulations(); ++i)
+	{
+
+		double pricestrikedifference{};
+
+		pricestrikedifference = prices[i] - getStrikePrice();
+
+		if (pricestrikedifference > 0)
+		{
+			puttotal += pricestrikedifference;
+		}
+		
+	}
+	std::cout << "Put value = "<< char(156) << OptionValue(puttotal) << '\n';
+}
+
+/*prints the call option value*/
+void Contract::CallValue()
+{
+	double calltotal{};
+
+	for (int i = 0; i < getNumberOfSimulations(); ++i)
+	{
+
+		double pricestrikedifference{};
+
+		pricestrikedifference = prices[i] - getStrikePrice();
+
+		if (pricestrikedifference < 0)
+		{
+			calltotal += -1 * pricestrikedifference;
+		}
+	}
+	std::cout << "Call value = "<<char(156)<< OptionValue(calltotal) << '\n';
+}
+
+/*prints the average price of the assest at strike time*/
+void Contract::AverageStrikePrice()
+{
+	std::cout << "Average assest price at strike time :" << char(156) << Mean(prices) << '\n';
 }

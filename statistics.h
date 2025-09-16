@@ -1,10 +1,14 @@
 #ifndef STATISTICS_PACKAGE
 #define STATISTICS_PACKAGE
 
+class Statistics {
+public:
 
-double mean(std::vector<double>& vector);
-double stdev(std::vector<double>& vector);
+	double Mean(std::vector<double>& vector);
 
+	double StDev(std::vector<double>& vector);
+
+};
 
 #endif
 

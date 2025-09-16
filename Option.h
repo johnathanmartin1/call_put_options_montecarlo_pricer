@@ -2,7 +2,10 @@
 #ifndef Contracts
 #define Contracts
 
-class Contract {
+#include "MonteCarlo.h"
+
+
+class Contract:public MonteCarlo {
 private:
 	std::unique_ptr<double> StartingPrice;
 	std::unique_ptr<double> InterestRate;
@@ -10,7 +13,7 @@ private:
 	std::unique_ptr<double> TimeStepSize;
 	std::unique_ptr<double> StrikeTime;
 	std::unique_ptr<double> StrikePrice;
-	std::unique_ptr<double> Mean;
+	std::unique_ptr<double> RandomMean;
 	std::unique_ptr<double> StandardDeviation;
 	std::unique_ptr<int> NumberOfSimulations;
 	std::vector<double> prices;
@@ -18,8 +21,8 @@ private:
 public:
 	/*forward declaration for "contract constructor of the variables"*/
 	Contract(double startingprice = 100, double interestrate = 0.05, double volatility = 0.2,
-		double strikeprice = 115, double striketime = 1, double timestepsize = 0.01,
-		double mean = 0, double standarddeviation = 1, int numberofsimulations = 10);
+		double strikeprice = 105, double striketime = 1, double timestepsize = 0.01,
+		double randommean = 0, double standarddeviation = 1, int numberofsimulations = 100);
 	
 	/*forward declaration for "setters for the variables"*/
 	void setStartingPrice(double newstartingprice);
@@ -28,7 +31,7 @@ public:
 	void setStrikePrice(double newstrikeprice);
 	void setStrikeTime(double newstriketime);
 	void setTimeStepSize(double newtimestepsize);
-	void setMean(double newmean);
+	void setRandomMean(double newmean);
 	void setStandardDeviation(double newstandarddeviation);
 	void setNumberOfSimulations(int newnumberofsimulations);
 	
@@ -39,11 +42,23 @@ public:
 	double getStrikePrice();
 	double getStrikeTime();
 	double getTimeStepSize();
-	double getMean();
+	double getRandomMean();
 	double getStandardDeviation();
 	int getNumberOfSimulations();
 
 	void VectorIntialisation(std::vector<double>& prices, int sims, double price);
+
+	void MonteCarlo();
+
+	void MonteCarloAuto();
+
+	double OptionValue(double sumoptionvalue);
+
+	void PutValue();
+
+	void CallValue();
+
+	void AverageStrikePrice();
 };
 
 
