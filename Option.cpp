@@ -416,6 +416,13 @@ void Contract::MonteCarlo()
 		getVolatility(), getTimeStepSize(), getRandomMean(), getStandardDeviation());
 }
 
+void Contract::simd128MonteCarlo()
+{
+	for (double t = 0; t < getStrikeTime(); t += getTimeStepSize()) {
+		prices = simd128BlackScholes(prices, getInterestRate(),
+			getVolatility(), getTimeStepSize(), getRandomMean(), getStandardDeviation());
+	}
+}
 /*runs a monte carlo simulation with the number of runs required for 95% cofidence interval */
 void Contract::MonteCarloAuto()
 {
@@ -427,9 +434,58 @@ void Contract::MonteCarloAuto()
 	
 	std::cout << "The number of required simulations for " << char(156) <<
 		"0.01 accuracy for 95% of runs is " <<
-		getNumberOfSimulations() << std::endl;
+		getNumberOfSimulations() <<"\n\n";
 	
 	MonteCarlo();
+}
+
+void Contract::simd128MonteCarloAuto()
+{
+	setNumberOfSimulations(1000);
+
+	for (double t = 0; t < getStrikeTime(); t += getTimeStepSize()) {
+		
+		prices = simd128BlackScholes(prices, getInterestRate(),
+			getVolatility(), getTimeStepSize(), getRandomMean(), getStandardDeviation());
+		
+	}
+	
+	setNumberOfSimulations(NumberOfRuns(prices)); //intialises the vctor with the required number os fims at the starting price
+
+	std::cout << "The number of required simulations for " << char(156) <<
+		"0.01 accuracy for 95% of runs is " <<
+		getNumberOfSimulations() << "\n\n";
+	for (double t = 0; t < getStrikeTime(); t += getTimeStepSize()) {
+
+	prices = simd128BlackScholes(prices, getInterestRate(),
+			getVolatility(), getTimeStepSize(), getRandomMean(), getStandardDeviation());
+	}
+	
+}
+
+void Contract::simd256MonteCarloAuto()
+{
+
+	setNumberOfSimulations(1000);
+
+	for (double t = 0; t < getStrikeTime(); t += getTimeStepSize()) {
+
+		prices = simd256BlackScholes(prices, getInterestRate(),
+			getVolatility(), getTimeStepSize(), getRandomMean(), getStandardDeviation());
+
+	}
+
+	setNumberOfSimulations(NumberOfRuns(prices)); //intialises the vctor with the required number os fims at the starting price
+
+	std::cout << "The number of required simulations for " << char(156) <<
+		"0.01 accuracy for 95% of runs is " <<
+		getNumberOfSimulations() << "\n\n";
+	for (double t = 0; t < getStrikeTime(); t += getTimeStepSize()) {
+
+		prices = simd256BlackScholes(prices, getInterestRate(),
+			getVolatility(), getTimeStepSize(), getRandomMean(), getStandardDeviation());
+	}
+
 }
 
 /*Produces the value of a contracts option absed on the call/pit sums of the simulation*/
@@ -456,8 +512,8 @@ void Contract::PutValue()
 	uppererror = PutValueCalc(priceplus);
 	lowererror = PutValueCalc(priceminus);
 	averagevalue = PutValueCalc(prices);
-	std::cout << "Put value = " << char(156) << averagevalue << " + " <<
-		uppererror - averagevalue << " - " << averagevalue - lowererror << '\n';
+	std::cout << "Put value = " << char(156) << averagevalue << "    ( + " <<
+		uppererror - averagevalue << " - " << averagevalue - lowererror << " )\n\n";
 }
 
 /*returns the put option value*/
@@ -536,8 +592,8 @@ void Contract::CallValue()
 	uppererror = CallValueCalc(priceplus);
 	lowererror = CallValueCalc(priceminus);
 	averagevalue = CallValueCalc(prices);
-	std::cout << "Call value = " << char(156) << averagevalue << " + " <<
-		uppererror - averagevalue << " - " << averagevalue - lowererror << '\n';
+	std::cout << "Call value = " << char(156) << averagevalue << "    ( + " <<
+		uppererror - averagevalue << " - " << averagevalue - lowererror << " )\n\n";
 }
 
 /*returns the call option value*/
@@ -563,6 +619,17 @@ double Contract::CallValueCalc(std::vector<double>& vector)
 /*prints the average price of the assest at the strike time with its associated errors*/
 void Contract::AverageStrikePrice()
 {
-	std::cout << "Average assest price at strike time :" << char(156) << Mean(prices) << " +- "
-		<< StDev(prices)*1.96 <<'\n';
+	std::cout << "Average assest price at strike time :" << char(156) << Mean(prices) << "    ( +- "
+		<< StDev(prices)*1.96 <<" )\n\n";
+}
+
+/*prints all the inoutted variables used in the class*/
+void Contract::Variables()
+{
+	std::cout << "Initial price: " << char(156) << getStartingPrice() << "\n\n";
+	std::cout << "Strike price: " << char(156) << getStrikePrice() << "\n\n";
+	std::cout << "Volatility: " << getVolatility() << "\n\n";
+	std::cout << "Interest rate: " << getInterestRate() << "\n\n";
+	std::cout << "Strike time: " << getStrikeTime() << " years\n\n";
+	std::cout << "Time step size: " << getTimeStepSize() << " years\n\n";
 }

@@ -1,18 +1,12 @@
 #ifndef Contracts
 #define Contracts
 
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <limits>
-
-
 
 #include "MonteCarlo.h"
 
-class Contract:public MonteCarlo {
-
-
+class Contract:public MonteCarlo 
+{
 /*-------------------------------------------------------------------------------------------------*/
 private:
 	std::unique_ptr<double> StartingPrice;
@@ -30,9 +24,9 @@ private:
 /*-------------------------------------------------------------------------------------------------*/
 public:
 	/*forward declaration for "contract constructor of the variables"*/
-	Contract(double startingprice = 100, double interestrate = 0.05, double volatility = 0.2,
-		double strikeprice = 150, double striketime = 0.01, double timestepsize = 2.6E-3,
-		double randommean = 0, double standarddeviation = 1, int numberofsimulations = 100);
+	Contract(double startingprice = 114.5, double interestrate = 0.05, double volatility = 0.2,
+		double strikeprice = 115, double striketime = 0.04, double timestepsize = 2.6E-3,
+		double randommean = 0, double standarddeviation = 1, int numberofsimulations = 1000);
 	
 	/*---------------------------------------------------------------------------------------------*/
 	/*Sanity check functions*/
@@ -103,7 +97,13 @@ public:
 
 	void MonteCarlo();
 
+	void simd128MonteCarlo();
+
 	void MonteCarloAuto();
+
+	void simd128MonteCarloAuto();
+
+	void simd256MonteCarloAuto();
 
 	double OptionValue(double sumoptionvalue);
 
@@ -120,5 +120,7 @@ public:
 	void CallValue();
 
 	void AverageStrikePrice();
+
+	void Variables();
 };
 #endif
