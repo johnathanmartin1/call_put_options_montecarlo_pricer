@@ -2,27 +2,30 @@
 //
 
 #include <iostream>
-#include <memory> 
-#include <random>
-#include <numeric>
-#include <vector>
+#include <chrono>
 
 #include "Option.h"
-#include "statistics.h"
 
 int main()
 {
-	Contract test{};
-	test.MonteCarlo();
+	auto start = std::chrono::high_resolution_clock::now();
 	
-	Contract test2{};
+	Contract test2{0};
+	
 	test2.MonteCarloAuto();
-
+	
+	auto end = std::chrono::high_resolution_clock::now();
+	
+	std::chrono::duration<double> elapsed = end - start;
+	
+	std::cout << "Elapsed time to run function: " << elapsed.count() << " seconds\n";
+	
 	test2.AverageStrikePrice();
+	
 	test2.CallValue();
+	
 	test2.PutValue();
 
-	
 	return 0;
 }
 

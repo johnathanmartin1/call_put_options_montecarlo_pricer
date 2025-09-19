@@ -1,7 +1,3 @@
-#include <iostream>
-#include <vector>
-#include <numeric>
-
 #include "statistics.h"
 
 /*Calculates the mean value of a vector*/
@@ -29,4 +25,10 @@ double Statistics::StDev(std::vector<double>& vector)
 	}
 	
 	return std::sqrt(sum / vector.size());
+}
+
+/*returns the 95 percent confidence interval of a vector*/
+double Statistics::ConfidenceInterval(std::vector<double>& vector)
+{
+	return 1.96 * StDev(vector);
 }

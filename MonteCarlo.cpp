@@ -1,31 +1,37 @@
-#include <iostream>
-#include <vector>
-#include <random>
-#include <numeric>
-
-
 #include "MonteCarlo.h"
 
 /*running the random walk at each time step for each element in the price array*/
-void MonteCarlo::RandomWalk(std::vector<double>& vector, double striketime, int numberofsims,
-	double interestrate, double volatility, double timestepsize, double mean, 
-	double standarddeviation) {
-	for (double t = 0.01; t <= striketime; t += 0.01) {
-		/*running through the price array and updating with the random walk pricing*/
-		for (int i = 0; i < numberofsims; ++i) {
+/*rterwrite to makle it more simd compatible*/
+void MonteCarlo::RandomWalk(std::vector<double>& vector, double striketime, const int numberofsims,
+	double interestrate, double volatility, double timestepsize, double mean,
+	double standarddeviation)
+{
+	/*looping through each simulation held in vector*/
+	//applying theparralell processing to the loop
+	for (double t = 0; t <= striketime; t += timestepsize)
+	{		
+		/*updating vector at each time step with black scholes log random walk*/
+		
+		
+		for (int i = 0; i < numberofsims; ++i)
+		{
 			vector[i] = BlackScholes(vector[i], interestrate, volatility, timestepsize, mean,
 				standarddeviation);
-		}		//std::cout << "prices in progress " << prices[i] << std::endl;
+
+		}
+		/*if (i % 1000 == 0) 
+		{
+			std::cout << "Simulations completed = " << i << '\r';
+		}*/
 	}
 }
-
 /*This function (random walk) could be made into a mutilthreaded operation as each element in
 the array is independent from another, this would increase speed*/
 double MonteCarlo::BlackScholes(double currentprice, double interestrate, double volatility,
 	double timestepsize, double mean, double standarddeviation) {
 		/*calculating the interest component of the assest price*/
 		double interest_component{};
-		interest_component = (interestrate - 0.5 * volatility * volatility) * timestepsize;
+		interest_component = (interestrate - 0.5 * std::pow(volatility,2)) * timestepsize;
 
 		//normal random number genrator centered on a goven mean with a given standard deviation
 		std::random_device r; //settig a random seed

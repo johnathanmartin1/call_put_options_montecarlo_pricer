@@ -1,6 +1,13 @@
 #ifndef MONTECARLO
 #define MONTECARLO
 
+#include <iostream>
+#include <vector>
+#include <random>
+#include <numeric>
+#include <omp.h>
+
+
 #include "statistics.h"
 
 class MonteCarlo: public Statistics {
