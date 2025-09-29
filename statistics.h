@@ -5,13 +5,8 @@
 #include <vector>
 #include <numeric>
 
-class Statistics 
-{
-/*-------------------------------------------------------------------------------------------------*/
-private:
 
-/*-------------------------------------------------------------------------------------------------*/
-public:
+
 
 	double Mean(std::vector<double>& vector);
 
@@ -19,7 +14,7 @@ public:
 
 	double ConfidenceInterval(std::vector<double>& vector);
 
-};
+
 
 #endif
 

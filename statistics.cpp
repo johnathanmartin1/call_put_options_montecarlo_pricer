@@ -1,7 +1,7 @@
 #include "statistics.h"
 
 /*Calculates the mean value of a vector*/
-double Statistics::Mean(std::vector<double>& vector) 
+double Mean(std::vector<double>& vector) 
 {
 	double sum{ 0 };
 	
@@ -14,7 +14,7 @@ double Statistics::Mean(std::vector<double>& vector)
 }
 
 /*calculates the standard deviation of a vector*/
-double Statistics::StDev(std::vector<double>& vector)
+double StDev(std::vector<double>& vector)
 {	
 	double sum{ 0 };
 	double average{ Mean(vector) };
@@ -28,7 +28,7 @@ double Statistics::StDev(std::vector<double>& vector)
 }
 
 /*returns the 95 percent confidence interval of a vector*/
-double Statistics::ConfidenceInterval(std::vector<double>& vector)
+double ConfidenceInterval(std::vector<double>& vector)
 {
 	return 1.96 * StDev(vector);
 }
