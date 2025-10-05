@@ -21,16 +21,19 @@ private:
 	double StrikePrice;
 	double RandomMean;
 	double StandardDeviation;
+	double Drift;
 	int NumberOfSimulations;
 	std::vector<double>* prices = new std::vector<double>{};
+	std::vector<double>* averagepersim = new std::vector<double>{};
 
 
 	/*-------------------------------------------------------------------------------------------------*/
 public:
 	/*forward declaration for the constructor of this class*/
 	Contract(double startingprice = 114.5, double interestrate = 0.05, double volatility = 0.2,
-		double strikeprice = 115, double striketime = 1, double timestepsize = 2.6E-3,
-		double randommean = 0, double standarddeviation = 1, int numberofsimulations = 1000);
+		double strikeprice = 115, double striketime = 0.08, double timestepsize = 2.6E-3,
+		double randommean = 0, double standarddeviation = 1, int numberofsimulations = 10000,
+		double drift = 0.05);
 
 	/*forward declaration for the destructor of this class*/
 	virtual ~Contract();
@@ -56,6 +59,7 @@ public:
 
 	void SanityCheckNumberOfSimulations();
 
+	void SanityCheckDrift();
 
 	/*---------------------------------------------------------------------------------------------*/
 	/*forward declaration for "setters for the variables"*/
@@ -78,6 +82,10 @@ public:
 	void setNumberOfSimulations(const int newnumberofsimulations);
 
 	void setPrices(const std::vector<double>& newprices);
+
+	void setAveragePerSim(const std::vector<double>& newprices);
+
+	void setDrift(const double newdrift);
 
 
 	/*---------------------------------------------------------------------------------------------*/
@@ -102,6 +110,10 @@ public:
 
 	std::vector<double> getPrices();
 
+	std::vector<double> getAveragePerSim();
+
+	double getDrift();
+
 
 	/*---------------------------------------------------------------------------------------------*/
 	/*forward declarations for functions*/
@@ -120,7 +132,10 @@ public:
 
 	virtual void CallValue();
 
+	/*---------------------------------------------------------------------------------------------*/
+	/*Asian option functions callabel through the unique pointer<contract>*/
 	
+	virtual void Value();
 };
 #endif
 

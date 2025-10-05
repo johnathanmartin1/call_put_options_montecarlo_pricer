@@ -8,9 +8,9 @@
 
 
 
-	double Mean(std::vector<double>& vector);
+	double Mean(const std::vector<double>& vector);
 
-	double StDev(std::vector<double>& vector);
+	double StDev(const std::vector<double>& vector);
 
 	double ConfidenceInterval(std::vector<double>& vector);
 

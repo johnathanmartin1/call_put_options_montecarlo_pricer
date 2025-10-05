@@ -1,7 +1,7 @@
 #include "statistics.h"
 
 /*Calculates the mean value of a vector*/
-double Mean(std::vector<double>& vector) 
+double Mean(const std::vector<double>& vector) 
 {
 	double sum{ 0 };
 	
@@ -14,7 +14,7 @@ double Mean(std::vector<double>& vector)
 }
 
 /*calculates the standard deviation of a vector*/
-double StDev(std::vector<double>& vector)
+double StDev(const std::vector<double>& vector)
 {	
 	double sum{ 0 };
 	double average{ Mean(vector) };

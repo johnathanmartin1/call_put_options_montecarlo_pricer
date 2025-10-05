@@ -1,11 +1,11 @@
 #include "Contract.h"
 
 /*-------------------------------------------------------------------------------------------------*/
-/*constructor for an object of this class*/
+/*constructor and destructor for an object of this class*/
 
 Contract::Contract(double startingprice, double interestrate, double volatility,
 	double strikeprice, double striketime, double timestepsize,
-	double randommean, double standarddeviation, int numberofsimulations) :
+	double randommean, double standarddeviation, int numberofsimulations, double drift) :
 
 	StartingPrice(startingprice),
 
@@ -51,6 +51,7 @@ Contract::~Contract()
 
 }
 
+
 /*-------------------------------------------------------------------------------------------------*/
 /*sanity check functions*/
 void Contract::SanityCheckStartingPrice()
@@ -94,6 +95,7 @@ void Contract::SanityCheckStartingPrice()
 		}
 	}
 	VectorIntialisation(*prices, getNumberOfSimulations(), getStartingPrice());
+	VectorIntialisation(*averagepersim, getNumberOfSimulations(), 0);
 }
 
 void Contract::SanityCheckInterestRate()
@@ -274,6 +276,24 @@ void Contract::SanityCheckRandomMean()
 	}
 }
 
+void Contract::SanityCheckDrift()
+{
+	/*checking that the input is a double*/
+	if (std::cin.fail()) {
+		while (std::cin.fail())
+		{
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cerr << "Drift must be a number\n";
+			std::cout << "Please enter a drift percentage: " << std::endl;
+			double newdrift{};
+			std::cin >> newdrift;
+			setDrift(newdrift);
+
+		}
+	}
+}
+
 void Contract::SanityCheckStandardDeviation()
 {
 	bool check{ false };
@@ -357,6 +377,7 @@ void Contract::SanityCheckNumberOfSimulations()
 		}
 	}
 	VectorIntialisation(*prices, getNumberOfSimulations(), getStartingPrice());
+	VectorIntialisation(*averagepersim, getNumberOfSimulations(),0);
 }
 
 
@@ -433,7 +454,18 @@ void Contract::setPrices(const std::vector<double>& newprices)
 	prices = new std::vector<double>{ newprices };
 }
 
+void Contract::setAveragePerSim(const std::vector<double>& newprices)
+{
+	delete averagepersim;
+	averagepersim = new std::vector<double>{ newprices };
+}
 
+void Contract::setDrift(const double newdrift)
+{
+	Drift = newdrift;
+
+	SanityCheckDrift();
+}
 /*-------------------------------------------------------------------------------------------------*/
 /*getters for private variables within this class*/
 
@@ -487,19 +519,30 @@ std::vector<double> Contract::getPrices()
 	return *prices;
 }
 
+std::vector<double> Contract::getAveragePerSim()
+{
+	return *averagepersim;
+}
+
+double Contract::getDrift()
+{
+	return Drift;
+}
 
 /*-------------------------------------------------------------------------------------------------*/
 /*functions for all contract class, excluding getters and setters*/
 
 /*intialises the price vector with the startting price with the required number of simulations*/
-void Contract::VectorIntialisation(std::vector<double>& prices, int sims, double price)
+void Contract::VectorIntialisation(std::vector<double>& vector, int vectorlength,
+	double elementvalue)
 {
-	prices.assign(sims, price);
+	vector.assign(vectorlength, elementvalue);
 }
 
 /*prints the average price of the assest at the strike time with its associated errors*/
 void Contract::AverageStrikePrice()
 {
+	
 	std::cout << "Average assest price at strike time :" << char(156) << Mean(getPrices()) 
 		<< "    ( +- " << StDev(getPrices())*1.96 <<" )\n\n";
 }
@@ -517,8 +560,9 @@ void Contract::Variables()
 
 
 /*-------------------------------------------------------------------------------------------------*/
-/*Base case fucntions for the european class to override if not iverriden thewn presnt the 
-user with a message saying the function is not usable with the selected contract class*/
+/*Base case functions for the european class to override. If not overriden then presnt the 
+user with a message saying the function is not usable with the selected contract class and
+exit the program*/
 
 void Contract::PutValue()
 {
@@ -530,6 +574,18 @@ void Contract::PutValue()
 void Contract::CallValue()
 {
 	std::cout << "CallValue() function does not work with the chosen contract type of \""
+		<< typeid(*this).name() << "\"\n";
+	exit(0);
+}
+
+/*-------------------------------------------------------------------------------------------------*/
+/*Base case functions for the asian class to override if not overriden then present the
+user with a message saying the function is not usable with the selected contract class and 
+exit the program*/
+
+void Contract::Value()
+{
+	std::cout << "PutValue() function does not work with the chosen contract type of \""
 		<< typeid(*this).name() << "\"\n";
 	exit(0);
 }

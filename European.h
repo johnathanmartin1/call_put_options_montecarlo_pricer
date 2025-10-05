@@ -6,25 +6,26 @@
 class European : public Contract
 {
 public:
-	void type() override {
-		std::cout << "Contract type is European\n\n";
-	}
-
 	~European()
 	{
 		std::cout << "European option deleted\n";
+		std::cout << "------------------end of option------------------\n\n\n";
+	}
+
+	void type() override {
+		std::cout << "Contract type is European\n\n";	
 	}
 	
 	/*functions for calculating the call and put values*/
-	double OptionValue(const double sumoptionvalue);// override;
+	double OptionValue(const double sumoptionvalue);
 
-	double PutValueCalc(const std::vector<double>& vector);// override;
+	double PutValueCalc(const std::vector<double>& vector);
 
-	double CallValueCalc(const std::vector<double>& vector);// override;
+	double CallValueCalc(const std::vector<double>& vector);
 
-	double PutValueError(const std::vector<double>& vector);// override;
+	double PutValueError(const std::vector<double>& vector);
 
-	double CallValueError(const std::vector<double>& vector);// override;
+	double CallValueError(const std::vector<double>& vector);
 
 	void PutValue() override;
 
