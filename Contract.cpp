@@ -195,7 +195,7 @@ void Contract::SanityCheckStrikeTime()
 		}
 
 		/*checking the inout is greater than 0*/
-		if (StartingPrice <= 0)
+		if (StrikeTime <= 0)
 		{
 			std::cout << "Strike time must be a number greater than " << "0.00\n";
 			std::cout << "Please enter a strike time: " << std::endl;
